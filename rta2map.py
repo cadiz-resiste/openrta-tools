@@ -1,8 +1,20 @@
+import sys
+import os
 import json
+import re
 import folium
 from pyproj import Transformer
 from branca.element import Template, MacroElement
 
+def comprobar_expresion_regular(texto, expresion_regular):
+    # Compila la expresión regular
+    patron = re.compile(expresion_regular)
+    
+    # Comprueba si la cadena de texto cumple la expresión regular
+    if patron.match(texto):
+        return True
+    else:
+        return False
 
 def meters_to_degrees(easting, northing, zone_number, northern_hemisphere=True):
     """
@@ -58,26 +70,30 @@ def leer_configuracion(fichero):
         # Asignar las variables desde el fichero JSON
         file_var = config.get("file")
         file_out = config.get("file_out")
+        zoom_start = config.get("zoom_start")
+        circ_radio = config.get("circ_radio")
+        reprov = config.get("reprov")
+        remunicipio = config.get("remunicipio")
+        lat_centro = config.get("lat_centro")
+        lon_centro =config.get("lon_centro")
 
-        return file_var, file_out
+        return file_var, file_out, zoom_start, circ_radio, reprov, remunicipio, lat_centro, lon_centro
 
     except FileNotFoundError:
         print(f"El fichero {fichero} no se encuentra.")
-        return None, None
+        return None, None, None, None, None, None, None, None
     except json.JSONDecodeError:
         print("Error al decodificar el fichero JSON.")
-        return None, None
+        return None, None, None, None, None, None, None, None
 
 # Función para leer y filtrar registros de un fichero JSON en formato UTF-8
-def leer_y_filtrar_registros_json(fichero):
+def genera_mapa_desde_rtajson(fichero, lat, lon, zoom_start, circ_radio, reprov, remunicipio):
     try:
         # Abrir y leer el contenido del fichero JSON con codificación UTF-8
         with open(fichero, 'r', encoding='utf-8') as file:
             data = json.load(file)
 
         # Crear el mapa centrado en las coordenadas especificadas
-        lat = 36.52612  # Latitud del centro del mapa (Cadiz, España)
-        lon = -6.28871  # Longitud del centro del mapa         (Cadiz, España)
         zoom_start=14
         m = folium.Map(location=[lat, lon], zoom_start=zoom_start, tiles="CartoDB Positron")
         # Crear una leyenda personalizada usando una plantilla HTML
@@ -136,7 +152,8 @@ def leer_y_filtrar_registros_json(fichero):
         # Filtrar registros según los criterios especificados
         registros_filtrados = []
         for registro in data:
-            if (registro.get("MUNICIPIO") == "CÁDIZ" and
+            if (comprobar_expresion_regular(str(registro.get("PROVINCIA")), reprov) and
+                comprobar_expresion_regular(str(registro.get("MUNICIPIO")), remunicipio) and
                 registro.get("TIPO_OBJETO") in ["Vivienda de uso turístico", "Apartamento turístico"] and
                 registro.get("COORD_X") not in ["", "null", None] and
                 registro.get("COORD_Y") not in ["", "null", None]):
@@ -182,7 +199,7 @@ def leer_y_filtrar_registros_json(fichero):
                 if (color != "blue"):
                     circulo = folium.CircleMarker(
                         location=[lat, lon],
-                        radius=10,  # Radio en metros
+                        radius=circ_radio,  # Radio en pixels
                         color=color,
                         fill=True,
                         fillOpacity=1.0,
@@ -211,32 +228,49 @@ def leer_y_filtrar_registros_json(fichero):
     except json.JSONDecodeError:
         print("Error al decodificar el fichero JSON.")
 
-# Nombre del fichero JSON de configuración
-fichero_config = 'rta2map.json'
+def obtener_nombre_fichero_configuracion():
+    # Obtiene el nombre del programa en ejecución
+    nombre_programa = os.path.basename(__file__)
+    
+    # Cambia la extensión del nombre del programa de .py a .json
+    nombre_configuracion_por_defecto = os.path.splitext(nombre_programa)[0] + '.json'
+    
+    # Obtiene los argumentos de la línea de comandos
+    argumentos = sys.argv
+    
+    # Si hay al menos un argumento después del nombre del programa, úsalo como nombre de fichero de configuración
+    if len(argumentos) > 1:
+        nombre_configuracion = argumentos[1]
+    else:
+        # Si no, usa el nombre por defecto
+        nombre_configuracion = nombre_configuracion_por_defecto
+    
+    return nombre_configuracion
 
-# Llamar a la función para leer el fichero de configuración y asignar las variables
-file_var, file_out = leer_configuracion(fichero_config)
+if __name__ == "__main__":
+    nombre_fichero_configuracion = obtener_nombre_fichero_configuracion()
+    print(f"Nombre del fichero de configuración: {nombre_fichero_configuracion}")
+    fichero_config = nombre_fichero_configuracion
 
-# Imprimir los valores de las variables asignadas
-print(f"file: {file_var}")
-print(f"file_out: {file_out}")
-
-lat_centro = 36.52612  # Latitud del centro del mapa (Cadiz, España)
-lon_centro = -6.28871  # Longitud del centro del mapa (Cadiz, España)
-# lat_centro = 40.416775  # Latitud del centro del mapa (Madrid, España)
-# lon_centro = -3.703790  # Longitud del centro del mapa (Madrid, España)
-easting_utm = 205812.726053923  # Coordenada Este en UTM
-northing_utm = 4047326.36246818  # Coordenada Norte en UTM
-zone_number = 30  # Número de la zona UTM
-northern_hemisphere = True  # Hemisferio norte
-lat_centro, lon_centro = meters_to_degrees(easting_utm, northing_utm, zone_number, northern_hemisphere)
-
-print(f"latitud: {lat_centro}")
-print(f"longitud: {lon_centro}")
-
-
-# generate_osm_map(lat_centro, lon_centro, 14, file_out)
-
-# Llamar a la función para leer y filtrar los registros del JSON
-leer_y_filtrar_registros_json(file_var)
-
+    # Llamar a la función para leer el fichero de configuración y asignar las variables
+    file_var, file_out, zoom_start, circ_radio, reprov, remunicipio, lat_centro, lon_centro = leer_configuracion(fichero_config)
+    
+    # Imprimir los valores de las variables asignadas
+    print(f"file: {file_var}")
+    print(f"file_out: {file_out}")
+    
+    # lat_centro = 36.52612  # Latitud del centro del mapa (Cadiz, España)
+    # lon_centro = -6.28871  # Longitud del centro del mapa (Cadiz, España)
+    # easting_utm = 205812.726053923  # Coordenada Este en UTM
+    # northing_utm = 4047326.36246818  # Coordenada Norte en UTM
+    zone_number = 30  # Número de la zona UTM
+    northern_hemisphere = True  # Hemisferio norte
+    
+    print(f"latitud: {lat_centro}")
+    print(f"longitud: {lon_centro}")
+    print(f"Exp Regular Provincia: {reprov}")
+    print(f"Exp Regular Municipio: {remunicipio}")
+    
+    # Llamar a la función para leer y filtrar los registros del JSON
+    genera_mapa_desde_rtajson(file_var, lat_centro, lon_centro, zoom_start, circ_radio, reprov, remunicipio)
+    
