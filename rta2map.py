@@ -165,7 +165,8 @@ def genera_mapa_desde_rtajson(fichero, lat, lon, zoom_start, circ_radio, reprov,
                 lat, lon = meters_to_degrees(float(coord_x_),float(coord_y_), zone_number, northern_hemisphere)
                 # print(f"lat= {lat}")
                 # print(f"lon= {lon}")
-                licencia=str(registro.get("COD_REGISTRO"))
+                domicilio_estab = str(registro.get("DOMICILIO_ESTAB"))
+                licencia = str(registro.get("COD_REGISTRO"))
                 texto_html = f"""
                     <!DOCTYPE html>
                     <html lang="es">
@@ -176,7 +177,7 @@ def genera_mapa_desde_rtajson(fichero, lat, lon, zoom_start, circ_radio, reprov,
                     </head>
                     <body>
                         <h1>{licencia}</h1>
-                        <p>{name}</p>
+                        <p>{name}<br>{domicilio_estab}</p>
                     </body>
                     </html>
                 """

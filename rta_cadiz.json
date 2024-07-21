@@ -3,8 +3,8 @@
     "file_out": "cadiz_map.html",
     "zoom_start": 14,
     "circ_radio": 4,
-    "reprov": "^(?i)C[ÁA]DIZ$",
-    "remunicipio": "^(?i)C[Á]DIZ$",
+    "reprov": "(?i)^C[ÁA]DIZ$",
+    "remunicipio": "(?i)^C[Á]DIZ$",
     "lat_centro": 36.52612,
     "lon_centro": -6.28871
 }
