@@ -94,7 +94,6 @@ def genera_mapa_desde_rtajson(fichero, lat, lon, zoom_start, circ_radio, reprov,
             data = json.load(file)
 
         # Crear el mapa centrado en las coordenadas especificadas
-        zoom_start=14
         m = folium.Map(location=[lat, lon], zoom_start=zoom_start, tiles="CartoDB Positron")
         # Crear una leyenda personalizada usando una plantilla HTML
         template = """

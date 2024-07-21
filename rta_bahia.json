@@ -1,0 +1,10 @@
+{
+    "file": "C:\\Users\\jripo\\OneDrive\\Documentos\\Turistificación\\openrta-json\\openrta.json",
+    "file_out": "bahia_cadiz_map.html",
+    "zoom_start": 12,
+    "circ_radio": 4,
+    "reprov": "(?i)^C[ÁA]DIZ$",
+    "remunicipio": "(?i)PUERTO DE SANTA MAR[ÍI]A|CÁDIZ|ROTA|SAN FERNANDO|PUERTO REAL",
+    "lat_centro": 36.59969,
+    "lon_centro": -6.22859
+}
