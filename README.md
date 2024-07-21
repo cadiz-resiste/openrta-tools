@@ -19,12 +19,12 @@ Herramientas para procesar el registro turístico de la Junta de Andalucía
 ## Uso
 
 - Descarga y descomprime el fichero openrta.json de la web de datos abiertos de la junta de andalucía
-- Edita el fichero de configuración rta2map.json para indicar la localización de l fichero de datos json
-- Ejecuta python rta2map.py. Creará un fichero con nombre cadiz_map.html que se puede incluir en un servidor web.
+- Edita o copia el fichero de configuración rta2map.json para indicar la localización del fichero de datos json, el nombre del fichero de salida, las coordenadas centrales del mapa, el nivel de zoom, el radio de los puntos y las expresiones regulares para filtrar las provincias y los municipios
+- Ejecuta python rta2map.py <fichero de configuración|vacío> Creará un fichero con nombre <fichero de salida> que se puede incluir en un servidor web. Si no se especifica fichero de configuración utilizará el nombre rta2map.json
 
 ## Características
 
-El programa crea un mapa con las viviendas de uso turístico (en rojo) y apartamentos turísticos en negro. No se incluyen las viviendas que aluilan habitaciones ni los estabelecimiento hoteleros.
+El programa crea un mapa con las viviendas de uso turístico (en rojo) y apartamentos turísticos en negro. No se incluyen las viviendas que alquilan habitaciones ni los estabelecimiento hoteleros.
 
 ## Contacto
 
